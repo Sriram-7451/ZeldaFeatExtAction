@@ -25,7 +25,15 @@ jobs:
     - name: Run tests
       run: mvn test
 
-    - name: Compile and run
+    - name: Build
+      if: env.CHANGED_FILES != ''
       run: |
-        javac HelloWorld.java
-        java HelloWorld
+        for file in $(cat changed_files.txt); do
+          echo "Processing $file..."
+          # Compile the Java file
+          javac "$file"
+          # Extract class name by stripping directory and extension
+          classname=$(basename "$file" .java)
+          # Run the compiled class file
+          java "$classname"
+        done
