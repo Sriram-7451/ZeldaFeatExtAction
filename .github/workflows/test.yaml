@@ -40,10 +40,11 @@ jobs:
           git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.java$' || true > changed_files.txt
           echo "CHANGED_FILES=$(cat changed_files.txt)" >> $GITHUB_ENV
 
-      # Step 6: Print changed `.java` files
-      - name: Print changed files
+      # Step 6: Debugging changed files
+      - name: Debug CHANGED_FILES
         run: |
-          echo "Changed files:"
+          echo "Changed files from CHANGED_FILES: ${{ env.CHANGED_FILES }}"
+          echo "Contents of changed_files.txt:"
           cat changed_files.txt
 
       # Step 7: Build and run changed `.java` files
