@@ -25,7 +25,18 @@ jobs:
     - name: Run tests
       run: mvn test
 
-    - name: Build
+    - name: Get changed Java files
+      id: changed-files
+      run: |
+        git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.java$' > changed_files.txt
+        echo "CHANGED_FILES=$(cat changed_files.txt)" >> $GITHUB_ENV
+
+    - name: Print changed files
+      run: |
+        echo "Changed files:"
+        cat changed_files.txt
+
+    - name: Build and test changed files
       if: env.CHANGED_FILES != ''
       run: |
         for file in $(cat changed_files.txt); do
