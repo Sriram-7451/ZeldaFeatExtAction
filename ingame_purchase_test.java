@@ -21,4 +21,6 @@ public class RandomizerTest {
             System.out.println(randomizer.getRandomString(8, charSet));
         }
     }
+
+    
 }
