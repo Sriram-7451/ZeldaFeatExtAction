@@ -10,59 +10,71 @@ on:
       - dev
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      # Step 1: Check out the repository
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensure full commit history is fetched
 
-      # Step 2: Set up Java environment
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
           java-version: '11'
           distribution: 'temurin'
 
-      # Step 3: Install project dependencies
       - name: Install dependencies
         run: mvn install
 
-      # Step 4: Run all tests
-      - name: Run tests
-        run: mvn test
-
-      # Step 5: Detect changed `.java` files
       - name: Get changed Java files
         id: changed-files
         run: |
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.java$' || true > changed_files.txt
+          echo "Detecting changed Java files..."
+          base_ref=${{ github.event.pull_request.base.sha || 'origin/dev' }}
+          echo "Comparing ${base_ref} with HEAD..."
+          git diff --name-only "${base_ref}" HEAD | grep '\.java$' || true > changed_files.txt
           echo "CHANGED_FILES=$(cat changed_files.txt)" >> $GITHUB_ENV
 
-      # Step 6: Debugging changed files
-      - name: Debug CHANGED_FILES
+      - name: Print changed files
         run: |
-          echo "Changed files from CHANGED_FILES: ${{ env.CHANGED_FILES }}"
-          echo "Contents of changed_files.txt:"
+          echo "Changed files:"
           cat changed_files.txt
 
-      # Step 7: Build and run changed `.java` files
-      - name: Build and test changed files
-        if: env.CHANGED_FILES != ''
+    outputs:
+      changed_files: ${{ steps.changed-files.outputs.CHANGED_FILES }}
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    if: needs.build.result == 'success'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Run tests
+        run: mvn test
+
+      - name: Test changed Java files
         run: |
-          echo "Building and testing changed Java files..."
+          if [[ -z "${{ needs.build.outputs.changed_files }}" ]]; then
+            echo "No changed Java files to test."
+            exit 0
+          fi
+          echo "Testing changed Java files..."
           for file in $(cat changed_files.txt); do
             echo "Processing $file..."
-            
-            # Compile the file
             javac "$file" || exit 1
-
-            # Determine the class name and directory
             dir=$(dirname "$file")
             classname=$(basename "$file" .java)
-
-            # Run the compiled class (assumes no packages; adjust if needed)
             echo "Running $classname..."
             java -cp "$dir" "$classname" || exit 1
           done
