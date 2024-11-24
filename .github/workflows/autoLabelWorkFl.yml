@@ -10,41 +10,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository
-      - name: Checkout to the Repository
+     # Step 1: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Install the jq dependency
+      - name: Install jq
         run: sudo apt-get install jq
 
-      - name: Determine the Labels for the issue
+      - name: Determine Labels
         id: determine-labels
         run: |
           ISSUE_CONTENT=$(jq -r '.issue.title + " " + .issue.body' "${{ github.event_path }}")
           LABELS=""
           
           # Define label rules
-          if [[ "$ISSUE_CONTENT" == "bug" ]]; then
+          if [[ "$ISSUE_CONTENT" == *"bug"* ]]; then
             LABELS+="bug,"
           fi
           
-          if [[ "$ISSUE_CONTENT" == "feature" ]]; then
+          if [[ "$ISSUE_CONTENT" == *"feature"* ]]; then
             LABELS+="enhancement,"
           fi
           
-          if [[ "$ISSUE_CONTENT" == "docs" ]]; then
+          if [[ "$ISSUE_CONTENT" == *"docs"* ]]; then
             LABELS+="documentation,"
           fi
           
-          if [[ "$ISSUE_CONTENT" == "frontend" ]]; then
+          if [[ "$ISSUE_CONTENT" == *"frontend"* ]]; then
             LABELS+="FrontEnd,"
           fi
           
-          if [[ "$ISSUE_CONTENT" == "backend" ]]; then
+          if [[ "$ISSUE_CONTENT" == *"backend"* ]]; then
             LABELS+="backend,"
           fi
           
-          if [[ "$ISSUE_CONTENT" == "UI" ]]; then
+          if [[ "$ISSUE_CONTENT" == *"UI"* ]]; then
             LABELS+="UI,"
           fi
 
