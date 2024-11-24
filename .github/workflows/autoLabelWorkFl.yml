@@ -1,5 +1,6 @@
 name: Automating Issue assignment to issues
 
+
 on:
   issues:
     types: [opened]
@@ -10,42 +11,53 @@ jobs:
 
     steps:
       # Step 1: Checkout repository
-      - name: Checkout Repository
+      - name: Checkout to the Repository
         uses: actions/checkout@v3
 
-      # Step 2: Auto-label issues based on content
-      - name: Add Labels to Issues
-        uses: actions-ecosystem/action-add-labels@v1
-        with:
-          github_token: ${{ secrets.AUTOMATE_SECRET }}
-          labels: ${{ steps.determine-labels.outputs.labels }}
-      - name: Determine Labels
+      - name: Install the jq dependency
+        run: sudo apt-get install jq
+
+      - name: Determine the Labels for the issue
         id: determine-labels
         run: |
           ISSUE_CONTENT=$(jq -r '.issue.title + " " + .issue.body' "${{ github.event_path }}")
           LABELS=""
           
+          # Define label rules
           if [[ "$ISSUE_CONTENT" == "bug" ]]; then
             LABELS+="bug,"
           fi
+          
           if [[ "$ISSUE_CONTENT" == "feature" ]]; then
             LABELS+="enhancement,"
           fi
+          
           if [[ "$ISSUE_CONTENT" == "docs" ]]; then
             LABELS+="documentation,"
           fi
-          if [[ "$ISSUE_CONTENT" == "design" ]]; then
-            LABELS+="frontend,"
+          
+          if [[ "$ISSUE_CONTENT" == "frontend" ]]; then
+            LABELS+="FrontEnd,"
           fi
+          
           if [[ "$ISSUE_CONTENT" == "backend" ]]; then
             LABELS+="backend,"
           fi
-          if [[ "$ISSUE_CONTENT" == "test" ]]; then
-            LABELS+="testing,"
+          
+          if [[ "$ISSUE_CONTENT" == "UI" ]]; then
+            LABELS+="UI,"
           fi
-          if [[ "$ISSUE_CONTENT" == "urgentfix" ]]; then
-            LABELS+="hotfix,"
-          fi
+
           # Remove trailing comma and export
           LABELS=${LABELS%,}
-          echo "The labels has been assigned name=labels::$LABELS"
+          echo "labels=$LABELS" >> $GITHUB_ENV
+        
+      - name: Determine the label for the issue
+        run: |
+          echo "The label for the task created is: ${{ env.labels }}"
+
+      - name: Apply Labels to Issue
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          labels: ${{ env.labels }}
