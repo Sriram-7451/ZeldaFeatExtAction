@@ -1,17 +1,27 @@
 # .github/labeler.yml
-
-bug:
-  - bug
-  - fix
+# Label for hotifx   
+  hotfix:
+    - urgent
+    - apex priority
+    - devastating
+#    Label for bug fixes
+  bug:
+    - bug
+    - fix
+#  Label for frontend changes
+  frontend:
+    - UI/UX
+    - ui/ux
+    - design
   
 # Label for document-related changes
-documentation:
-  - docs
-  - documentation
-
+  documentation:
+    - docs
+    - documentation
 
 # Label for enhancement-related changes
-enhancement:
-  - feature
-  - enhancement
-  
+  enhancement:
+    - feature
+    - enhancement
+    - task  
+
