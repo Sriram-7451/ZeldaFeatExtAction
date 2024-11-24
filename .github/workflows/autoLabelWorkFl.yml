@@ -48,4 +48,4 @@ jobs:
           fi
           # Remove trailing comma and export
           LABELS=${LABELS%,}
-          echo "::set-output name=labels::$LABELS"
+          echo "The labels has been assigned name=labels::$LABELS"
