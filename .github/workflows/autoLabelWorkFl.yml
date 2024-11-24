@@ -1,21 +1,51 @@
-name: Auto-Labelling of Issues
-#Constraints on when the label are changed
+name: Automating Issue assignment to issues
+
 on:
   issues:
     types: [opened]
 
-#Permissions for what needs to be authorized
-permissions:
-  contents: read
-  issues: write
-
-#Different jobs based on what should be done
 jobs:
-  label_issues:
+  auto-label:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Adding Labels
-        uses: actions/issue-labeler@v3
+      # Step 1: Checkout repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Step 2: Auto-label issues based on content
+      - name: Add Labels to Issues
+        uses: actions-ecosystem/action-add-labels@v1
         with:
-          repo-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          configuration-path: .github/labellerAction.yml
+          github_token: ${{ secrets.AUTOMATE_SECRET }}
+          labels: ${{ steps.determine-labels.outputs.labels }}
+      - name: Determine Labels
+        id: determine-labels
+        run: |
+          ISSUE_CONTENT=$(jq -r '.issue.title + " " + .issue.body' "${{ github.event_path }}")
+          LABELS=""
+          
+          if [[ "$ISSUE_CONTENT" == "bug" ]]; then
+            LABELS+="bug,"
+          fi
+          if [[ "$ISSUE_CONTENT" == "feature" ]]; then
+            LABELS+="enhancement,"
+          fi
+          if [[ "$ISSUE_CONTENT" == "docs" ]]; then
+            LABELS+="documentation,"
+          fi
+          if [[ "$ISSUE_CONTENT" == "design" ]]; then
+            LABELS+="frontend,"
+          fi
+          if [[ "$ISSUE_CONTENT" == "backend" ]]; then
+            LABELS+="backend,"
+          fi
+          if [[ "$ISSUE_CONTENT" == "test" ]]; then
+            LABELS+="testing,"
+          fi
+          if [[ "$ISSUE_CONTENT" == "urgentfix" ]]; then
+            LABELS+="hotfix,"
+          fi
+          # Remove trailing comma and export
+          LABELS=${LABELS%,}
+          echo "::set-output name=labels::$LABELS"
