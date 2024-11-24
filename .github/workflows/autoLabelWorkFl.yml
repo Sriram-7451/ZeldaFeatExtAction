@@ -1,5 +1,4 @@
-name: Automating Issue assignment to issues
-
+name: Auto Label Of Issue Names
 
 on:
   issues:
@@ -10,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-     # Step 1: Checkout repository
+      # Step 1: Checkout repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
@@ -52,12 +51,12 @@ jobs:
           LABELS=${LABELS%,}
           echo "labels=$LABELS" >> $GITHUB_ENV
         
-      - name: Determine the label for the issue
+      - name: Debug Labels
         run: |
-          echo "The label for the task created is: ${{ env.labels }}"
+          echo "Labels determined: ${{ env.labels }}"
 
       - name: Apply Labels to Issue
         uses: actions-ecosystem/action-add-labels@v1
         with:
-          github_token: ${{ secrets.AUTOMATE_TOKEN }}
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           labels: ${{ env.labels }}
