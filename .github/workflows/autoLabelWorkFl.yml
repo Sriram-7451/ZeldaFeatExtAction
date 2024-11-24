@@ -17,5 +17,5 @@ jobs:
       - name: Adding Labels
         uses: actions/issue-labeler@v3
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           configuration-path: .github/labellerAction.yml
