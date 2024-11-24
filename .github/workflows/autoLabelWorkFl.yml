@@ -1,4 +1,4 @@
-name: Auto Label Of Issue Names
+name: labelling the Issues based on the description
 
 on:
   issues:
@@ -10,13 +10,13 @@ jobs:
 
     steps:
       # Step 1: Checkout repository
-      - name: Checkout Repository
+      - name: Checkout to the appropriate Repository
         uses: actions/checkout@v3
 
-      - name: Install jq
+      - name: Install the jq dependency
         run: sudo apt-get install jq
 
-      - name: Determine Labels
+      - name: Determine the Labels for the issue
         id: determine-labels
         run: |
           ISSUE_CONTENT=$(jq -r '.issue.title + " " + .issue.body' "${{ github.event_path }}")
@@ -51,11 +51,11 @@ jobs:
           LABELS=${LABELS%,}
           echo "labels=$LABELS" >> $GITHUB_ENV
         
-      - name: Debug Labels
+      - name: Debug of the Labels
         run: |
           echo "Labels determined: ${{ env.labels }}"
 
-      - name: Apply Labels to Issue
+      - name: Applying the labels to the issue
         uses: actions-ecosystem/action-add-labels@v1
         with:
           github_token: ${{ secrets.AUTOMATE_SECRET }}
